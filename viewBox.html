@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 一练文档 前端板Beta-0.2 -->
+<!-- 作者：NianSir -->
+<!-- 时间：2024年6月30日15:30:43 -->
+<!-- 开源地址：https://github.com/NianLog/OneGlance -->
+<head>
+    <meta charset="UTF-8">
+    <title>Markdown解析预览 - ✍一练文档</title>
+    <link rel="stylesheet" href="assets/twcss.css">
+    <link rel="stylesheet" href="assets/prism.css">
+    <link rel="stylesheet" href="assets/common.css">
+    <script src="assets/showdown-2.1.0/dist/showdown.min.js"></script>
+    <script src="assets/js/prism.js"></script>
+</head>
+
+<body>
+    <div class="alert">
+        <strong>⚠注意：</strong>本页面为一练(OneGlance)文档在线预览页，请勿随意分享此页面
+    </div>
+    <article id="markdown-content"></article>
+
+    <div class="copyright">
+        &copy; 2024 ✍一练 | 服务支持：年先生 NianSir
+    </div>
+
+    <div id="passwordModal"
+        class="fixed top-0 left-0 w-full h-full flex items-center justify-center hidden bg-black bg-opacity-50">
+        <div class="bg-white p-4 rounded shadow max-w-md">
+            <p class="text-center">🔐身份验证：请输入访问秘钥</p>
+            <input id="passwordInput" type="password" placeholder="请输入访问密钥"
+                class="w-full p-2 rounded border border-gray-300 mb-4">
+            <div class="flex justify-between">
+                <button id="cancelPassword" class="bg-gray-500 text-white p-2 rounded">取消</button>
+                <button id="submitPassword" class="bg-blue-500 text-white p-2 rounded">验证</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var pageTitle = "";
+        window.addEventListener('popstate', function () {
+            if (pageTitle !== "" && pageTitle !== document.title) {
+                document.title = pageTitle;
+            }
+        });
+
+        window.addEventListener('hashchange', function () {
+            if (pageTitle !== "" && pageTitle !== document.title) {
+                document.title = pageTitle;
+            }
+        });
+
+        function setPageTitle(newTitle) {
+            pageTitle = newTitle;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordModal = document.getElementById('passwordModal');
+            const passwordInput = document.getElementById('passwordInput');
+            const cancelPassword = document.getElementById('cancelPassword');
+            const submitPassword = document.getElementById('submitPassword');
+
+            // Function to check if password validation is required
+            function checkPasswordValidation() {
+                const isPasswordValidated = sessionStorage.getItem('isPasswordValidated');
+                if (isPasswordValidated === 'true') {
+                    loadDocumentContent();
+                } else {
+                    passwordModal.classList.remove('hidden');
+                }
+            }
+
+            function loadDocumentContent() {
+                // 从URL参数中获取Markdown文件路径
+                const urlParams = new URLSearchParams(window.location.search);
+                const markdownFile = urlParams.get('file');
+
+                // 使用Ajax加载Markdown文档内容
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', markdownFile, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var converter = new showdown.Converter({ parseHeader: true });
+                        var markdownContent = xhr.responseText;
+                        var htmlContent = converter.makeHtml(markdownContent);
+                        document.getElementById('markdown-content').innerHTML = htmlContent;
+
+                        // 使用Prism.js对代码块进行高亮显示
+                        Prism.highlightAll();
+                    }
+                };
+                xhr.send();
+            }
+
+            checkPasswordValidation();
+
+            cancelPassword.addEventListener('click', () => {
+                passwordModal.classList.add('hidden');
+                passwordInput.value = '';
+                window.location.href = '/';
+            });
+
+            submitPassword.addEventListener('click', () => {
+                const inputKey = passwordInput.value.trim();
+                const urlParams = new URLSearchParams(window.location.search);
+                const filePath = urlParams.get('file');
+
+                // 从配置文件中获取对应路径的信息
+                fetch('mymd/config.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to load configuration file');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // 查找对应路径的文件信息
+                        const file = data.files.find(file => file.path === filePath);
+                        if (file) {
+                            pageTitle = file.name;
+                            // 验证密码
+                            if (inputKey === file.key) {
+                                sessionStorage.setItem('isPasswordValidated', 'true');
+                                passwordModal.classList.add('hidden');
+                                loadDocumentContent();
+                            } else {
+                                alert('密码错误，请重新输入.');
+                            }
+                        } else {
+                            throw new Error('File not found in configuration');
+                        }
+                    })
+                    .catch(error => console.error('Error loading configuration or validating password:', error));
+            });
+        });
+    </script>
+</body>
+
+</html>

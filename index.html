@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 一练文档 前端板Beta-0.2 -->
+<!-- 作者：NianSir -->
+<!-- 时间：2024年6月30日15:30:43 -->
+<!-- 开源地址：https://github.com/NianLog/OneGlance -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✍一练文档 - 只做实用的学习分享</title>
+    <link rel="stylesheet" href="assets/twcss.css">
+    <style>
+        /* 版权信息 */
+        .copyright {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+
+        #markdown-content {
+            margin: 0 3em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100">
+        <div class="container mx-auto p-4">
+            <header class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold">✍一练</h1>
+                <button id="toggleDarkMode"
+                    class="bg-zinc-300 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 p-2 rounded">
+                    切换模式
+                </button>
+            </header>
+            <section class="text-center mb-8">
+                <h2 class="text-4xl font-bold text-purple-700 animate-pulse">纵使十年磨一剑，不如今朝看一练</h2>
+                <h4 class="text-lg text-gray-600 animate-bounce">The Blade of Decades? Your Exam Aid in a Single Glance.
+                </h4>
+                <p class="text-lg">Welcome~ 欢迎来到 [✍一练] 在线知识文档，这里汇集了丰富的应试在线文档资源，助力高效复习，快速应对期末周！<br>如果您也有好的资源可以分享，请在 <a
+                        href="https://emos.niansir.com/s/obVTUs" target="_blank" rel="noopener noreferrer"
+                        class="text-blue-500 underline hover:text-blue-700 transition-all">此处</a> 提交给我们，拯救更多伙伴！</p>
+            </section>
+            <section>
+                <div class="flex items-center">
+                    <img src="./assets/image/logo.png" alt="一练文档" class="mr-2 h-6 w-6">
+                    <h2 class="text-3xl font-semibold mb-4">一练文档列表</h2>
+                </div>                           
+                <div id="fileList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+                </div>
+            </section>
+        </div>
+    </div>
+    <!-- Modal for password input -->
+    <div id="passwordModal"
+        class="fixed top-0 left-0 w-full h-full flex items-center justify-center hidden bg-black bg-opacity-50">
+        <div class="bg-white p-4 rounded shadow max-w-md">
+            <p class="text-center">🔑访问密码效验</p>
+            <input id="passwordInput" type="password" placeholder="请输入访问秘钥"
+                class="w-full p-2 rounded border border-gray-300 mb-4">
+            <div class="flex justify-between">
+                <button id="cancelPassword" class="bg-gray-500 text-white p-2 rounded">取消</button>
+                <button id="submitPassword" class="bg-blue-500 text-white p-2 rounded">验证</button>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        &copy; 2024 ✍一练 | 服务支持：年先生 NianSir
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileList = document.getElementById('fileList');
+            const toggleDarkMode = document.getElementById('toggleDarkMode');
+            const passwordModal = document.getElementById('passwordModal');
+            const cancelPassword = document.getElementById('cancelPassword');
+            const passwordInput = document.getElementById('passwordInput');
+            const submitPassword = document.getElementById('submitPassword');
+
+            // 切换白天/黑夜模式
+            toggleDarkMode.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+
+            // 读取 JSON 配置文件
+            fetch('mymd/config.json')
+                .then(response => response.json())
+                .then(data => {
+                    data.files.forEach(file => {
+                        const fileCard = document.createElement('div');
+                        fileCard.className = 'bg-white dark:bg-zinc-800 p-4 rounded shadow';
+                        fileCard.innerHTML = `
+            <h2 class="text-xl font-semibold mb-2">${file.name}</h2>
+            <button class="bg-blue-500 text-white p-2 rounded view-file" data-path="${file.path}" data-key="${file.key}">查看文档</button>
+            <p class="whitespace-pre-line text-sm leading-normal mt-2">${file.info}</p>
+          `;
+                        fileList.appendChild(fileCard);
+                    });
+                    // 查看文档按钮点击事件
+                    document.querySelectorAll('.view-file').forEach(button => {
+                        button.addEventListener('click', handleViewFileClick);
+                    });
+                })
+                .catch(error => console.error('Error loading config:', error));
+        });
+        function handleViewFileClick() {
+            passwordModal.classList.remove('hidden');
+            const path = this.dataset.path;
+            const key = this.dataset.key;
+
+            cancelPassword.addEventListener('click', () => {
+                passwordModal.classList.add('hidden');
+                passwordInput.value = '';
+            });
+
+            function submitPasswordClickHandler() {
+                const inputKey = passwordInput.value.trim();
+                if (inputKey === key && inputKey !== '') {
+                    sessionStorage.setItem('isPasswordValidated', 'true');
+                    window.location.href = `/viewBox.html?file=${encodeURIComponent(path)}`;
+                } else {
+                    alert('密码验证失败，请重试.');
+                }
+            }
+            // 移除旧的点击事件处理程序
+            submitPassword.removeEventListener('click', submitPasswordClickHandler);
+
+            // 添加新的点击事件处理程序
+            submitPassword.addEventListener('click', submitPasswordClickHandler);
+        }
+    </script>
+</body>
+
+</html>

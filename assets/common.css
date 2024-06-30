@@ -1,0 +1,185 @@
+/* 默认样式定义 - 手动控制部分 */
+/* By NianSir 2024年6月17日14:46:48 */
+/* 用于补充控制MD文档转化成HTML内容缺少的样式 */
+/* 版本：0.2 */
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: bold;
+    line-height: 1.2;
+    margin: 0.5em 0;
+}
+
+h1 {
+    font-size: 2.25rem;
+}
+
+h2 {
+    font-size: 1.875rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+}
+
+h5 {
+    font-size: 1rem;
+}
+
+h6 {
+    font-size: 0.875rem;
+}
+
+/* Links */
+a {
+    color: blue;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: darkblue;
+}
+
+/* Lists */
+ul,
+ol {
+    padding-left: 1.5rem;
+    margin: 0.2em 0;
+}
+
+li {
+    margin-bottom: 0.5rem;
+    margin: 0.2em 0;
+}
+
+/* Paragraphs */
+p {
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+/* Blockquotes */
+blockquote {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    background-color: #f9f9f9;
+    border-left: 4px solid #ccc;
+}
+
+/* Code blocks */
+pre {
+    background-color: #f4f4f4;
+    padding: 1rem;
+    overflow-x: auto;
+    border-radius: 0.5rem;
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1em;
+    font-weight: 700;
+    background-color: #e0e0e032;
+    color: #ff63ae;
+    padding: 2px;
+}
+
+/* Code block with syntax highlighting */
+pre code {
+    display: block;
+    background-color: #333;
+    /* Dark background color */
+    color: #fff;
+    /* Light text color */
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+/* Day theme */
+.day-theme pre code {
+    background-color: #333;
+    /* Dark background color */
+    color: #fff;
+    /* Light text color */
+}
+
+/* Night theme */
+.night-theme pre code {
+    background-color: #f4f4f4;
+    /* Light background color */
+    color: #333;
+    /* Dark text color */
+}
+
+
+/* 样式提示框 */
+.alert {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+/* 版权信息 */
+.copyright {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px;
+}
+
+#markdown-content {
+    margin: 0 3em;
+}
+
+ol {
+    list-style-type: decimal;
+    padding-left: 20px;
+  }
+  
+  ol li {
+    margin: 10px 0;
+  }
+  
+  ol ol {
+    list-style-type: lower-alpha;
+  }
+  
+  ol ol ol {
+    list-style-type: lower-roman;
+  }
+  
+  ol ol ol ol {
+    list-style-type: decimal;
+  }
+ol {
+  list-style-type: decimal;
+  padding-left: 20px;
+}
+
+ol li {
+  margin: 10px 0;
+}
+
+ol ol {
+  list-style-type: lower-alpha;
+}
+
+ol ol ol {
+  list-style-type: lower-roman;
+}
+
+ol ol ol ol {
+  list-style-type: decimal;
+}
+  
