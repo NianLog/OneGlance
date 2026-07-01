@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown解析预览 - ✍一练文档</title>
+    <link rel="stylesheet" href="assets/twcss.css">
+    <link rel="stylesheet" href="assets/prism.css">
+    <link rel="stylesheet" href="assets/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="assets/showdown-2.1.0/dist/showdown.min.js"></script>
+    <script src="assets/js/prism.js"></script>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-light: #a5b4fc;
+            --primary-dark: #4f46e5;
+            --accent-color: #8b5cf6;
+            --bg-color: #ffffff;
+            --bg-secondary: #f8fafc;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --card-bg: #ffffff;
+            --code-bg: #f1f5f9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+        }
+
+        .dark {
+            --bg-color: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-color: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --card-bg: #1e293b;
+            --code-bg: #1e293b;
+            --primary-light: #818cf8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+            line-height: 1.75;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* ========== 阅读进度条 ========== */
+        .reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            z-index: 1001;
+            transition: width 0.1s ease-out;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ========== 顶部导航栏 ========== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 64px;
+        }
+
+        .dark .navbar {
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        .navbar-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-muted);
+        }
+
+        .doc-title-nav {
+            font-weight: 600;
+            color: var(--text-color);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ========== 按钮样式 ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+            background: linear-gradient(135deg, var(--primary-dark), #7c3aed);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            padding: 8px 12px;
+        }
+
+        .btn-ghost:hover {
+            background: var(--bg-secondary);
+            color: var(--text-color);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        /* ========== 主容器布局 ========== */
+        .main-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0;
+        }
+
+        /* ========== 左侧目录栏 ========== */
+        .sidebar-left {
+            width: 280px;
+            position: sticky;
+            top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+            padding: 24px 16px;
+            border-right: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.875rem;
+        }
+
+        .sidebar-header i {
+            color: var(--primary-color);
+        }
+
+        .toc-container {
+            position: relative;
+        }
+
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-item {
+            margin: 0;
+        }
+
+        .toc-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .toc-link::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .toc-link:hover {
+            color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .toc-link:hover::before {
+            background: var(--primary-color);
+            width: 6px;
+            height: 6px;
+        }
+
+        .toc-link.active {
+            color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.12);
+            font-weight: 600;
+        }
+
+        .toc-link.active::before {
+            background: var(--primary-color);
+            width: 6px;
+            height: 6px;
+        }
+
+        .toc-link.h3 {
+            padding-left: 28px;
+            font-size: 0.8125rem;
+        }
+
+        .toc-link.h3::before {
+            width: 3px;
+            height: 3px;
+        }
+
+        /* ========== 内容区域 ========== */
+        .content-wrapper {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-area {
+            flex: 1;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 48px;
+            width: 100%;
+        }
+
+        /* ========== 文档头部信息区 ========== */
+        .doc-header {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .doc-header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-bottom: 16px;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
+        }
+
+        .doc-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .doc-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .doc-meta-item i {
+            font-size: 14px;
+        }
+
+        .doc-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .doc-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* ========== Markdown内容样式 ========== */
+        .markdown-content {
+            line-height: 1.8;
+        }
+
+        .markdown-content h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 48px 0 24px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary-light);
+            scroll-margin-top: 80px;
+        }
+
+        .markdown-content h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 40px 0 20px;
+            scroll-margin-top: 80px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .markdown-content h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+
+        .markdown-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 32px 0 16px;
+            scroll-margin-top: 80px;
+        }
+
+        .markdown-content h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 24px 0 12px;
+        }
+
+        .markdown-content p {
+            margin: 0 0 20px;
+            color: var(--text-color);
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin: 0 0 20px;
+            padding-left: 24px;
+        }
+
+        .markdown-content li {
+            margin: 8px 0;
+            color: var(--text-color);
+            position: relative;
+        }
+
+        .markdown-content ul li::marker {
+            color: var(--primary-color);
+        }
+
+        .markdown-content ol li::marker {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .markdown-content li ul,
+        .markdown-content li ol {
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        /* ========== 引用块样式 ========== */
+        .markdown-content blockquote {
+            margin: 24px 0;
+            padding: 16px 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+            color: var(--text-secondary);
+            font-style: normal;
+        }
+
+        .markdown-content blockquote p {
+            margin: 0;
+        }
+
+        /* ========== 代码样式 ========== */
+        .markdown-content code {
+            padding: 4px 8px;
+            margin: 0 2px;
+            font-size: 0.875em;
+            background-color: var(--code-bg);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .markdown-content pre {
+            margin: 24px 0;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            border: none;
+            position: relative;
+        }
+
+        .markdown-content pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .markdown-content pre code {
+            padding: 0;
+            background: transparent;
+            color: #e2e8f0;
+            font-size: 100%;
+            border: none;
+            white-space: pre;
+        }
+
+        /* ========== 表格样式 ========== */
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            display: block;
+            overflow-x: auto;
+        }
+
+        .markdown-content th {
+            padding: 14px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            text-align: left;
+            font-weight: 600;
+            color: white;
+            border-bottom: none;
+        }
+
+        .markdown-content td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .markdown-content tr:last-child td {
+            border-bottom: none;
+        }
+
+        .markdown-content tr:nth-child(even) td {
+            background: var(--bg-secondary);
+        }
+
+        /* ========== 链接样式 ========== */
+        .markdown-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .markdown-content a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .markdown-content a:hover::after {
+            width: 100%;
+        }
+
+        /* ========== 图片样式 ========== */
+        .markdown-content img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 24px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ========== 分隔线样式 ========== */
+        .markdown-content hr {
+            margin: 40px 0;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+        }
+
+        /* ========== 强调文本 ========== */
+        .markdown-content strong {
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        /* ========== 提示框样式 ========== */
+        .callout {
+            margin: 24px 0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            border: 1px solid;
+        }
+
+        .callout-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .callout-content {
+            flex: 1;
+        }
+
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .callout-body {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .callout.important {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: var(--primary-light);
+        }
+
+        .callout.important .callout-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+        }
+
+        .callout.important .callout-title {
+            color: var(--primary-dark);
+        }
+
+        .dark .callout.important .callout-title {
+            color: var(--primary-light);
+        }
+
+        .callout.tip {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: #34d399;
+        }
+
+        .callout.tip .callout-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .callout.tip .callout-title {
+            color: #059669;
+        }
+
+        .dark .callout.tip .callout-title {
+            color: #34d399;
+        }
+
+        .callout.warning {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: #fbbf24;
+        }
+
+        .callout.warning .callout-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .callout.warning .callout-title {
+            color: #d97706;
+        }
+
+        .dark .callout.warning .callout-title {
+            color: #fbbf24;
+        }
+
+        .markdown-content .important-note {
+            display: flex;
+            margin: 24px 0;
+            padding: 20px 24px;
+            background: rgba(99, 102, 241, 0.08);
+            border-radius: 12px;
+            border: 1px solid var(--primary-light);
+            color: var(--text-color);
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .markdown-content .important-note::before {
+            content: '\f005';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            display: flex;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-right: 0;
+        }
+
+        .markdown-content .tip-box {
+            display: flex;
+            margin: 24px 0;
+            padding: 20px 24px;
+            background: rgba(16, 185, 129, 0.08);
+            border-radius: 12px;
+            border: 1px solid #34d399;
+            color: var(--text-color);
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .markdown-content .tip-box::before {
+            content: '\f0eb';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            display: flex;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-right: 0;
+        }
+
+        .markdown-content .warning-box {
+            display: flex;
+            margin: 24px 0;
+            padding: 20px 24px;
+            background: rgba(245, 158, 11, 0.08);
+            border-radius: 12px;
+            border: 1px solid #fbbf24;
+            color: var(--text-color);
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .markdown-content .warning-box::before {
+            content: '\f071';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            display: flex;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+            margin-right: 0;
+        }
+
+        /* ========== 浮动工具栏 ========== */
+        .floating-toolbar {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .floating-toolbar.visible {
+            opacity: 1;
+        }
+
+        .floating-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .floating-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        /* ========== 页脚 ========== */
+        .doc-footer {
+            margin-top: 64px;
+            padding: 32px 48px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .doc-footer-inner {
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .footer-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* ========== 密码验证弹窗 ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 420px;
+            width: 90%;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--bg-secondary);
+            color: var(--text-color);
+            margin-bottom: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .modal-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn-cancel {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-btn-cancel:hover {
+            background: var(--border-color);
+        }
+
+        .modal-btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+        }
+
+        .modal-btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+        }
+
+        /* ========== 移动端目录按钮 ========== */
+        .mobile-toc-btn {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 50;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+            transition: transform 0.2s ease;
+        }
+
+        .mobile-toc-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* ========== 响应式设计 ========== */
+        @media (max-width: 1200px) {
+            .sidebar-left {
+                width: 240px;
+            }
+            
+            .floating-toolbar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar-left {
+                display: none;
+            }
+            
+            .content-area {
+                padding: 32px 24px;
+            }
+            
+            .mobile-toc-btn {
+                display: flex;
+            }
+            
+            .doc-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .markdown-content h1 {
+                font-size: 1.5rem;
+            }
+            
+            .markdown-content h2 {
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .navbar {
+                padding: 0 16px;
+                height: 56px;
+            }
+            
+            .brand-logo {
+                font-size: 1rem;
+            }
+            
+            .breadcrumb {
+                display: none;
+            }
+            
+            .content-area {
+                padding: 24px 16px;
+            }
+            
+            .doc-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .markdown-content h1 {
+                font-size: 1.375rem;
+            }
+            
+            .markdown-content h2 {
+                font-size: 1.125rem;
+            }
+            
+            .markdown-content pre {
+                padding: 16px;
+                font-size: 0.8125rem;
+            }
+            
+            .markdown-content .important-note,
+            .markdown-content .tip-box,
+            .markdown-content .warning-box {
+                padding: 16px;
+            }
+            
+            .markdown-content .important-note::before,
+            .markdown-content .tip-box::before,
+            .markdown-content .warning-box::before {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .modal-content {
+                padding: 24px;
+            }
+            
+            .doc-footer {
+                padding: 24px 16px;
+            }
+        }
+
+        /* ========== 移动端目录弹窗 ========== */
+        .mobile-toc-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toc-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-toc-panel {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-toc-modal.active .mobile-toc-panel {
+            transform: translateY(0);
+        }
+
+        .mobile-toc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-toc-title {
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .mobile-toc-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 阅读进度条 -->
+    <div class="reading-progress" id="readingProgress"></div>
+
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <a href="/" class="brand-logo">
+                    <span class="brand-icon"><i class="fa-solid fa-book-open"></i></span>
+                    <span>一练</span>
+                </a>
+                <div class="breadcrumb">
+                    <a href="/">首页</a>
+                    <span class="breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></span>
+                    <span class="doc-title-nav" id="docTitleNav">文档预览</span>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <button id="toggleDarkMode" class="btn btn-ghost btn-icon" title="切换主题">
+                    <i id="modeIcon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="main-wrapper">
+        <!-- 左侧目录栏 -->
+        <aside class="sidebar-left" id="sidebarLeft">
+            <div class="sidebar-header">
+                <i class="fa-solid fa-list-ul"></i>
+                <span>目录导航</span>
+            </div>
+            <div class="toc-container">
+                <ul class="toc-list" id="tocList"></ul>
+            </div>
+        </aside>
+
+        <!-- 内容区域 -->
+        <div class="content-wrapper">
+            <main class="content-area">
+                <!-- 文档头部信息 -->
+                <header class="doc-header" id="docHeader" style="display: none;">
+                    <h1 id="docTitleMain"></h1>
+                    <div class="doc-meta">
+                        <span class="doc-meta-item">
+                            <i class="fa-solid fa-clock"></i>
+                            <span id="readingTime">预估阅读时间</span>
+                        </span>
+                        <span class="doc-meta-item">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span id="wordCount">字数统计</span>
+                        </span>
+                    </div>
+                    <div class="doc-tags" id="docTags">
+                        <span class="doc-tag"><i class="fa-solid fa-tag"></i> 学习笔记</span>
+                    </div>
+                </header>
+
+                <!-- Markdown内容 -->
+                <article id="markdown-content" class="markdown-content"></article>
+            </main>
+
+            <!-- 页脚 -->
+            <footer class="doc-footer">
+                <div class="doc-footer-inner">
+                    <div class="footer-brand">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>一练文档</span>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/NianLog/OneGlance" target="_blank" class="footer-link">
+                            <i class="fa-brands fa-github"></i> GitHub
+                        </a>
+                        <a href="https://niansir.com" target="_blank" class="footer-link">
+                            <i class="fa-solid fa-globe"></i> 官网
+                        </a>
+                    </div>
+                    <div class="copyright">
+                        © 2024 一练(OneGlance) · 服务支持：年先生 NianSir
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 浮动工具栏 -->
+    <div class="floating-toolbar" id="floatingToolbar">
+        <button class="floating-btn" id="scrollTopBtn" title="回到顶部">
+            <i class="fa-solid fa-arrow-up"></i>
+        </button>
+        <button class="floating-btn" id="shareBtn" title="分享链接">
+            <i class="fa-solid fa-share-nodes"></i>
+        </button>
+        <button class="floating-btn" id="copyLinkBtn" title="复制链接">
+            <i class="fa-solid fa-link"></i>
+        </button>
+    </div>
+
+    <!-- 移动端目录按钮 -->
+    <button class="mobile-toc-btn" id="mobileTocBtn">
+        <i class="fa-solid fa-list"></i>
+    </button>
+
+    <!-- 移动端目录弹窗 -->
+    <div class="mobile-toc-modal" id="mobileTocModal">
+        <div class="mobile-toc-panel">
+            <div class="mobile-toc-header">
+                <span class="mobile-toc-title">目录导航</span>
+                <button class="mobile-toc-close" id="mobileTocClose">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <ul class="toc-list" id="mobileTocList"></ul>
+        </div>
+    </div>
+
+    <!-- 密码验证弹窗 -->
+    <div id="passwordModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
+                <h3 class="modal-title">身份验证</h3>
+                <p class="modal-subtitle">请输入访问密钥以查看文档内容</p>
+            </div>
+            <input id="passwordInput" type="password" placeholder="请输入访问密钥" class="modal-input">
+            <div class="modal-actions">
+                <button id="cancelPassword" class="modal-btn modal-btn-cancel">取消</button>
+                <button id="submitPassword" class="modal-btn modal-btn-submit">验证访问</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var pageTitle = "";
+        var docContent = "";
+
+        // 页面标题同步
+        window.addEventListener('popstate', function () {
+            if (pageTitle !== "" && pageTitle !== document.title) {
+                document.title = pageTitle;
+            }
+        });
+
+        window.addEventListener('hashchange', function () {
+            if (pageTitle !== "" && pageTitle !== document.title) {
+                document.title = pageTitle;
+            }
+        });
+
+        function setPageTitle(newTitle) {
+            pageTitle = newTitle;
+            document.getElementById('docTitleNav').textContent = newTitle;
+            document.getElementById('docTitleMain').textContent = newTitle;
+            document.getElementById('docHeader').style.display = 'block';
+            document.title = newTitle + ' - 一练文档';
+        }
+
+        // 深色模式切换
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            const icon = document.getElementById('modeIcon');
+            if (document.body.classList.contains('dark')) {
+                icon.className = 'fa-solid fa-sun';
+            } else {
+                icon.className = 'fa-solid fa-moon';
+            }
+            localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+        }
+
+        // 阅读进度更新
+        function updateReadingProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = Math.min((scrollTop / docHeight) * 100, 100);
+            document.getElementById('readingProgress').style.width = progress + '%';
+            
+            // 显示/隐藏浮动工具栏
+            const toolbar = document.getElementById('floatingToolbar');
+            if (scrollTop > 300) {
+                toolbar.classList.add('visible');
+            } else {
+                toolbar.classList.remove('visible');
+            }
+        }
+
+        // 计算阅读时间
+        function calculateReadingTime(text) {
+            const wordCount = text.replace(/\s/g, '').length;
+            const readingTime = Math.ceil(wordCount / 400);
+            document.getElementById('readingTime').textContent = '预估阅读 ' + readingTime + ' 分钟';
+            document.getElementById('wordCount').textContent = '约 ' + wordCount + ' 字';
+        }
+
+        // 生成目录
+        function generateTOC() {
+            const content = document.getElementById('markdown-content');
+            const headings = content.querySelectorAll('h2, h3');
+            const tocList = document.getElementById('tocList');
+            const mobileTocList = document.getElementById('mobileTocList');
+            
+            tocList.innerHTML = '';
+            mobileTocList.innerHTML = '';
+            
+            headings.forEach((heading, index) => {
+                const id = 'heading-' + index;
+                heading.id = id;
+                
+                // 创建目录项
+                const createTocItem = (container) => {
+                    const li = document.createElement('li');
+                    li.className = 'toc-item';
+                    
+                    const link = document.createElement('span');
+                    link.className = 'toc-link';
+                    if (heading.tagName === 'H3') {
+                        link.classList.add('h3');
+                    }
+                    link.textContent = heading.textContent;
+                    link.onclick = () => {
+                        document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+                        document.querySelectorAll('.toc-link').forEach(l => {
+                            if (l.textContent === heading.textContent) {
+                                l.classList.add('active');
+                            }
+                        });
+                        document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        
+                        // 关闭移动端目录弹窗
+                        document.getElementById('mobileTocModal').classList.remove('active');
+                    };
+                    
+                    li.appendChild(link);
+                    container.appendChild(li);
+                };
+                
+                createTocItem(tocList);
+                createTocItem(mobileTocList);
+            });
+        }
+
+        // 高亮当前目录项
+        function highlightActiveHeading() {
+            const scrollPosition = window.scrollY + 100;
+            const headings = document.querySelectorAll('h2, h3');
+            
+            let activeHeading = null;
+            headings.forEach(heading => {
+                if (heading.offsetTop <= scrollPosition) {
+                    activeHeading = heading;
+                }
+            });
+            
+            document.querySelectorAll('.toc-link').forEach(link => link.classList.remove('active'));
+            if (activeHeading) {
+                document.querySelectorAll('.toc-link').forEach(link => {
+                    if (link.textContent === activeHeading.textContent) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 恢复深色模式状态
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark');
+                document.getElementById('modeIcon').className = 'fa-solid fa-sun';
+            }
+
+            // 事件监听
+            document.getElementById('toggleDarkMode').addEventListener('click', toggleDarkMode);
+            window.addEventListener('scroll', () => {
+                updateReadingProgress();
+                highlightActiveHeading();
+            });
+
+            // 浮动工具栏事件
+            document.getElementById('scrollTopBtn').addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            document.getElementById('shareBtn').addEventListener('click', () => {
+                if (navigator.share) {
+                    navigator.share({
+                        title: document.title,
+                        url: window.location.href
+                    });
+                } else {
+                    alert('您的浏览器不支持分享功能');
+                }
+            });
+            
+            document.getElementById('copyLinkBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(window.location.href);
+                alert('链接已复制到剪贴板');
+            });
+
+            // 移动端目录
+            document.getElementById('mobileTocBtn').addEventListener('click', () => {
+                document.getElementById('mobileTocModal').classList.add('active');
+            });
+            
+            document.getElementById('mobileTocClose').addEventListener('click', () => {
+                document.getElementById('mobileTocModal').classList.remove('active');
+            });
+            
+            document.getElementById('mobileTocModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('mobileTocModal')) {
+                    document.getElementById('mobileTocModal').classList.remove('active');
+                }
+            });
+
+            // 密码验证相关
+            const passwordModal = document.getElementById('passwordModal');
+            const passwordInput = document.getElementById('passwordInput');
+            const cancelPassword = document.getElementById('cancelPassword');
+            const submitPassword = document.getElementById('submitPassword');
+
+            function checkPasswordValidation() {
+                const isPasswordValidated = sessionStorage.getItem('isPasswordValidated');
+                if (isPasswordValidated === 'true') {
+                    loadDocumentContent();
+                } else {
+                    passwordModal.classList.add('active');
+                }
+            }
+
+            function loadDocumentContent() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const markdownFile = urlParams.get('file');
+
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', markdownFile, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var converter = new showdown.Converter({ 
+                            parseHeader: true,
+                            tables: true,
+                            strikethrough: true,
+                            tasklists: true
+                        });
+                        docContent = xhr.responseText;
+                        var htmlContent = converter.makeHtml(docContent);
+                        document.getElementById('markdown-content').innerHTML = htmlContent;
+
+                        Prism.highlightAll();
+                        generateTOC();
+                        updateReadingProgress();
+                        calculateReadingTime(docContent);
+                        
+                        // 给代码块添加语言标识
+                        document.querySelectorAll('pre code').forEach(block => {
+                            const lang = block.className.match(/language-(\w+)/);
+                            if (lang) {
+                                block.parentElement.setAttribute('data-lang', lang[1]);
+                            }
+                        });
+                    }
+                };
+                xhr.send();
+            }
+
+            checkPasswordValidation();
+
+            cancelPassword.addEventListener('click', () => {
+                passwordModal.classList.remove('active');
+                passwordInput.value = '';
+                window.location.href = '/';
+            });
+
+            submitPassword.addEventListener('click', () => {
+                const inputKey = passwordInput.value.trim();
+                const urlParams = new URLSearchParams(window.location.search);
+                const filePath = urlParams.get('file');
+
+                fetch('mymd/config.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to load configuration file');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const file = data.files.find(file => file.path === filePath);
+                        if (file) {
+                            setPageTitle(file.name);
+                            if (inputKey === file.key) {
+                                sessionStorage.setItem('isPasswordValidated', 'true');
+                                passwordModal.classList.remove('active');
+                                loadDocumentContent();
+                            } else {
+                                passwordInput.style.borderColor = 'var(--error-color)';
+                                passwordInput.value = '';
+                                setTimeout(() => {
+                                    passwordInput.style.borderColor = 'var(--border-color)';
+                                }, 2000);
+                            }
+                        } else {
+                            throw new Error('File not found in configuration');
+                        }
+                    })
+                    .catch(error => console.error('Error loading configuration or validating password:', error));
+            });
+
+            // ESC 键关闭弹窗
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    passwordModal.classList.remove('active');
+                    document.getElementById('mobileTocModal').classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

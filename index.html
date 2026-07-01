@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 一练文档 前端板Beta-0.3 -->
+<!-- 作者：NianSir -->
+<!-- 时间：2024年6月30日15:30:43 -->
+<!-- 开源地址：https://github.com/NianLog/OneGlance -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一练文档 - 只做实用的学习分享</title>
+    <link rel="stylesheet" href="assets/twcss.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #475569;
+            --secondary-color: #64748b;
+            --bg-color: #f8fafc;
+            --text-color: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --card-bg: #ffffff;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        html {
+            font-size: clamp(12px, 2.5vw, 16px);
+        }
+
+        .dark {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --card-bg: #1e293b;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+            min-width: 320px;
+            overflow-x: auto;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(248, 250, 252, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            min-width: 320px;
+        }
+
+        .dark .navbar {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-logo {
+            width: 32px;
+            height: 32px;
+        }
+
+        .navbar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* Hero区域 */
+        .hero-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 24px 32px;
+            text-align: center;
+            min-width: 320px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s linear infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% {
+                background-position: 0% center;
+            }
+            100% {
+                background-position: 200% center;
+            }
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            animation: bounce-animation 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce-animation {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .hero-description {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .hero-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .hero-link:hover {
+            color: var(--secondary-color);
+        }
+
+        /* 文档列表区域 */
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .section-count {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            background: var(--card-bg);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 文档卡片网格 */
+        .doc-grid {
+            display: grid;
+            gap: 20px;
+            min-width: 320px;
+        }
+
+        /* 文档卡片 */
+        .doc-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            padding-bottom: 110px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            min-width: 280px;
+            position: relative;
+            height: 280px;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .doc-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .doc-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            color: #ffffff;
+        }
+
+        .doc-info {
+            flex: 1;
+            min-width: 0;
+            word-break: break-word;
+        }
+
+        .doc-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .doc-meta {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .doc-meta-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .doc-meta-icon {
+            font-size: 12px;
+            width: 16px;
+            flex-shrink: 0;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* 进度条 */
+        .doc-progress {
+            position: absolute;
+            bottom: 95px;
+            left: 24px;
+            right: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-value {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+        /* 查看按钮 */
+        .doc-action {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+        }
+
+        .view-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+        }
+
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        }
+
+        .view-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+        }
+
+        .view-btn-icon {
+            font-size: 14px;
+        }
+
+        /* 页脚 */
+        .footer {
+            background: #1f2937;
+            color: #9ca3af;
+            text-align: center;
+            padding: 20px 24px;
+            font-size: 0.875rem;
+        }
+
+        .footer-link {
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        /* 密码验证弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
+        }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-cancel {
+            background: var(--border-color);
+            color: var(--text-color);
+            border: none;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #d1d5db;
+        }
+
+        .modal-btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+        }
+
+        .modal-btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 12px 16px;
+            }
+
+            .hero-section {
+                padding: 32px 16px 24px;
+            }
+
+            .hero-title {
+                font-size: 1.5rem;
+            }
+
+            .content-section {
+                padding: 0 16px 60px;
+            }
+
+            .doc-grid {
+                grid-template-columns: repeat(1, 1fr) !important;
+            }
+
+            .doc-card {
+                padding: 20px;
+                padding-bottom: 80px;
+                height: auto;
+                min-height: 240px;
+            }
+
+            .doc-icon-wrapper {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+
+            .doc-title {
+                font-size: 1rem;
+            }
+
+            .doc-progress {
+                bottom: 70px !important;
+            }
+
+            .doc-action {
+                bottom: 16px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <img src="./assets/image/logo.png" alt="一练文档" class="navbar-logo">
+                <span class="navbar-title">一练</span>
+            </div>
+            <button id="toggleDarkMode" class="theme-toggle">
+                <span id="themeIcon"><i class="fa-solid fa-moon"></i></span>
+                <span>切换模式</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero区域 -->
+    <section class="hero-section">
+        <h1 class="hero-title">纵使十年磨一剑，不如今朝看一练</h1>
+        <p class="hero-subtitle">The Blade of Decades? Your Exam Aid in a Single Glance.</p>
+        <p class="hero-description">
+            Welcome~ 欢迎来到 [一练] 在线知识文档，这里汇集了丰富的应试在线文档资源，助力高效复习，快速应对期末周！<br>
+            如果您也有好的资源可以分享，请在 <a href="https://emos.niansir.com/s/obVTUs" target="_blank" rel="noopener noreferrer" class="hero-link">此处</a> 提交给我们，拯救更多伙伴！
+        </p>
+    </section>
+
+    <!-- 文档列表区域 -->
+    <section class="content-section">
+        <div class="section-header">
+            <img src="./assets/image/logo.png" alt="一练文档" class="section-icon">
+            <h2 class="section-title">一练文档列表</h2>
+            <span class="section-count" id="docCount">0 个文档</span>
+        </div>
+        <div id="fileList" class="doc-grid"></div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        &copy; 2024 <a href="https://github.com/NianLog/OneGlance" target="_blank" class="footer-link"><i class="fa-solid fa-pen-nib"></i> 一练</a> | 服务支持：<a href="https://niansir.com" target="_blank" class="footer-link">年先生 NianSir</a>
+    </footer>
+
+    <!-- 密码验证弹窗 -->
+    <div id="passwordModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon"><i class="fa-solid fa-lock"></i></div>
+                <h3 class="modal-title">身份验证</h3>
+                <p class="modal-subtitle">请输入访问密钥以查看文档</p>
+            </div>
+            <input id="passwordInput" type="password" placeholder="请输入访问密钥" class="modal-input">
+            <div class="modal-actions">
+                <button id="cancelPassword" class="modal-btn modal-btn-cancel">取消</button>
+                <button id="submitPassword" class="modal-btn modal-btn-submit">验证</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileList = document.getElementById('fileList');
+            const docCountEl = document.getElementById('docCount');
+            const toggleDarkMode = document.getElementById('toggleDarkMode');
+            const themeIcon = document.getElementById('themeIcon');
+            const passwordModal = document.getElementById('passwordModal');
+            const cancelPassword = document.getElementById('cancelPassword');
+            const passwordInput = document.getElementById('passwordInput');
+            const submitPassword = document.getElementById('submitPassword');
+
+            // 检查localStorage并恢复dark模式状态
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark');
+                themeIcon.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+
+            // 切换白天/黑夜模式
+            toggleDarkMode.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('darkMode', isDark);
+                themeIcon.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+            });
+
+            // 读取 JSON 配置文件
+            fetch('mymd/config.json')
+                .then(response => response.json())
+                .then(data => {
+                    // 更新文档数量
+                    docCountEl.textContent = `${data.files.length} 个文档`;
+
+                    // 根据文档数量动态计算最优列数
+                    const docCount = data.files.length;
+                    let cols;
+                    
+                    if (docCount <= 1) {
+                        cols = 1;
+                    } else if (docCount === 2) {
+                        cols = 2;
+                    } else if (docCount === 3) {
+                        cols = 3;
+                    } else if (docCount === 4) {
+                        cols = 2; // 2x2
+                    } else if (docCount === 5) {
+                        cols = 3; // 3+2
+                    } else if (docCount === 6) {
+                        cols = 3; // 3x2
+                    } else if (docCount === 7) {
+                        cols = 4; // 4+3
+                    } else {
+                        cols = 3; // 3列自动填充
+                    }
+                    
+                    // 设置网格列数（仅在非移动端生效）
+                    if (window.innerWidth > 768) {
+                        fileList.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                    } else {
+                        fileList.style.gridTemplateColumns = 'repeat(1, 1fr)';
+                    }
+                    
+                    const icons = [
+                        '<i class="fa-solid fa-file-pen"></i>',
+                        '<i class="fa-solid fa-book"></i>',
+                        '<i class="fa-solid fa-laptop-code"></i>',
+                        '<i class="fa-solid fa-graduation-cap"></i>',
+                        '<i class="fa-solid fa-chart-column"></i>',
+                        '<i class="fa-solid fa-wrench"></i>',
+                        '<i class="fa-solid fa-gear"></i>',
+                        '<i class="fa-solid fa-chart-line"></i>',
+                        '<i class="fa-solid fa-bullseye"></i>',
+                        '<i class="fa-solid fa-lightbulb"></i>'
+                    ];
+                    
+                    data.files.forEach((file, index) => {
+                        const fileCard = document.createElement('div');
+                        fileCard.className = 'doc-card';
+                        
+                        const progressMatch = file.info.match(/完成进度：(\d+)%/);
+                        const progress = progressMatch ? progressMatch[1] : '0';
+                        
+                        // 解析作者和密码信息
+                        const authorMatch = file.info.match(/作者：([^<]+)/);
+                        const author = authorMatch ? authorMatch[1] : '未知作者';
+                        
+                        const passwordMatch = file.info.match(/密码：([^<]+)/);
+                        const passwordHint = passwordMatch ? passwordMatch[1] : '需验证';
+                        
+                        const docIcon = icons[index % icons.length];
+                        
+                        fileCard.innerHTML = `
+                            <div class="doc-card-header">
+                                <div class="doc-icon-wrapper">${docIcon}</div>
+                                <div class="doc-info">
+                                    <h3 class="doc-title">${file.name}</h3>
+                                    <div class="doc-meta">
+                                        <div class="doc-meta-item">
+                                            <span class="doc-meta-icon"><i class="fa-solid fa-user"></i></span>
+                                            <span>作者：${author}</span>
+                                        </div>
+                                        <div class="doc-meta-item">
+                                            <span class="doc-meta-icon"><i class="fa-solid fa-key"></i></span>
+                                            <span>${passwordHint}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-progress">
+                                <div class="progress-header">
+                                    <span class="progress-label">完成进度</span>
+                                    <span class="progress-value">${progress}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                            <div class="doc-action">
+                                <button class="view-btn view-file" data-path="${file.path}" data-key="${file.key}">
+                                    <span class="view-btn-icon"><i class="fa-solid fa-book-open"></i></span>
+                                    <span>点击查看</span>
+                                </button>
+                            </div>
+                        `;
+                        
+                        fileList.appendChild(fileCard);
+                    });
+                    
+                    // 查看文档按钮点击事件
+                    document.querySelectorAll('.view-file').forEach(button => {
+                        button.addEventListener('click', handleViewFileClick);
+                    });
+                })
+                .catch(error => console.error('Error loading config:', error));
+        });
+
+        function handleViewFileClick() {
+            const passwordModal = document.getElementById('passwordModal');
+            const passwordInput = document.getElementById('passwordInput');
+            const cancelPassword = document.getElementById('cancelPassword');
+            const submitPassword = document.getElementById('submitPassword');
+            
+            passwordModal.classList.add('active');
+            passwordInput.value = '';
+            passwordInput.focus();
+            
+            const path = this.dataset.path;
+            const key = this.dataset.key;
+
+            cancelPassword.onclick = () => {
+                passwordModal.classList.remove('active');
+                passwordInput.value = '';
+            };
+
+            submitPassword.onclick = () => {
+                const inputKey = passwordInput.value.trim();
+                if (inputKey === key && inputKey !== '') {
+                    sessionStorage.setItem('isPasswordValidated', 'true');
+                    window.location.href = `/viewBox.html?file=${encodeURIComponent(path)}`;
+                } else {
+                    alert('密码验证失败，请重试.');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            };
+            
+            // 点击遮罩层关闭
+            passwordModal.onclick = (e) => {
+                if (e.target === passwordModal) {
+                    passwordModal.classList.remove('active');
+                    passwordInput.value = '';
+                }
+            };
+            
+            // ESC键关闭
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && passwordModal.classList.contains('active')) {
+                    passwordModal.classList.remove('active');
+                    passwordInput.value = '';
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
