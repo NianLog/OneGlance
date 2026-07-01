@@ -526,14 +526,12 @@
 
         /* ========== 表格样式 ========== */
         .markdown-content table {
-            width: 100%;
+            max-width: 100%;
             border-collapse: collapse;
-            margin: 24px 0;
+            margin: 24px auto;
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--border-color);
-            display: block;
-            overflow-x: auto;
         }
 
         .markdown-content th {
@@ -696,15 +694,18 @@
         }
 
         .markdown-content .important-note {
-            display: flex;
+            position: relative;
+            display: block;
             margin: 24px 0;
             padding: 20px 24px;
             background: rgba(99, 102, 241, 0.08);
             border-radius: 12px;
             border: 1px solid var(--primary-light);
             color: var(--text-color);
-            gap: 16px;
-            align-items: flex-start;
+            padding-left: 60px;
+            overflow-wrap: break-word;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .markdown-content .important-note::before {
@@ -720,20 +721,25 @@
             justify-content: center;
             color: white;
             font-size: 16px;
-            flex-shrink: 0;
-            margin-right: 0;
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .markdown-content .tip-box {
-            display: flex;
+            position: relative;
+            display: block;
             margin: 24px 0;
             padding: 20px 24px;
             background: rgba(16, 185, 129, 0.08);
             border-radius: 12px;
             border: 1px solid #34d399;
             color: var(--text-color);
-            gap: 16px;
-            align-items: flex-start;
+            padding-left: 60px;
+            overflow-wrap: break-word;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .markdown-content .tip-box::before {
@@ -749,20 +755,25 @@
             justify-content: center;
             color: white;
             font-size: 16px;
-            flex-shrink: 0;
-            margin-right: 0;
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .markdown-content .warning-box {
-            display: flex;
+            position: relative;
+            display: block;
             margin: 24px 0;
             padding: 20px 24px;
             background: rgba(245, 158, 11, 0.08);
             border-radius: 12px;
             border: 1px solid #fbbf24;
             color: var(--text-color);
-            gap: 16px;
-            align-items: flex-start;
+            padding-left: 60px;
+            overflow-x: auto;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .markdown-content .warning-box::before {
@@ -778,8 +789,18 @@
             justify-content: center;
             color: white;
             font-size: 16px;
-            flex-shrink: 0;
-            margin-right: 0;
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .markdown-content .warning-box code,
+        .markdown-content .tip-box code,
+        .markdown-content .important-note code {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: inherit;
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         /* ========== 浮动工具栏 ========== */
@@ -1523,7 +1544,14 @@
                             parseHeader: true,
                             tables: true,
                             strikethrough: true,
-                            tasklists: true
+                            tasklists: true,
+                            simplifiedAutoLink: true,
+                            literalMidWordUnderscores: true,
+                            noHeaderId: true,
+                            disableForced4SpacesIndentedSublists: true,
+                            smoothLivePreview: true,
+                            requireSpaceBeforeHeadingText: true,
+                            noAutoLineBreaks: true
                         });
                         docContent = xhr.responseText;
                         var htmlContent = converter.makeHtml(docContent);
@@ -1540,6 +1568,12 @@
                             if (lang) {
                                 block.parentElement.setAttribute('data-lang', lang[1]);
                             }
+                        });
+                        
+                        // 修复提示框内容中的换行问题
+                        document.querySelectorAll('.important-note, .tip-box, .warning-box').forEach(box => {
+                            const text = box.textContent.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+                            box.innerHTML = text.replace(/`([^`]+)`/g, '<code>$1</code>');
                         });
                     }
                 };
